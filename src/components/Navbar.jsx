@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import image from "../assets/images/logo.png"
 
@@ -7,6 +7,7 @@ import Categories from '../pages/Categories';
 
 export const Navbar = () => {
   return (
+
       <div className='h-15 border-2 border-[#800000] '>
     
         <div className='logohere flex h-5 '>

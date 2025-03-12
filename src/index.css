@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@font-face {
+    font-family: 'NULL';
+    src: url('./assets/fonts/Null_Free.woff') format('woff'); /* Adjust path if needed */
+    font-weight: normal;
+    font-style: normal;
+  }
 
 
 
