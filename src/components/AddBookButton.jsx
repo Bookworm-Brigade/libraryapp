@@ -79,7 +79,7 @@ const AddButton = () => {
         // Construct a user-friendly error message based on the server response
         let errorMessage = "Validation failed:\n";
         if (errorDetails.details) {
-          for (const [field, message] of Object.entries(errorDetails.details)) {
+          for (const [, message] of Object.entries(errorDetails.details)) {
             errorMessage += `- ${message}\n`;
           }
         } else {
