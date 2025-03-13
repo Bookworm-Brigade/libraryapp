@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../assets/image.png/";
+import logo from "../assets/images/image.png";
 import { Link } from "react-router";
 
 export const Landing = () => {
@@ -13,7 +13,7 @@ export const Landing = () => {
         />
       </div>
 
-     <Link to={'/books'}><button className="bg-[#B9413F] font-[700] text-lg sm:text-xl md:text-2xl lg:text-3xl text-white px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-5 lg:px-12 lg:py-6 rounded-full absolute bottom-10 right-4 sm:bottom-12 sm:right-6 md:bottom-14 md:right-8 lg:bottom-16 lg:right-10">
+     <Link to={'/books'}><button className="bg-[#B9413F] font-[700] text-lg sm:text-xl md:text-2xl lg:text-3xl text-white px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-5 lg:px-12 lg:py-6 rounded-full absolute bottom-10 right-4 sm:bottom-12 sm:right-6 md:bottom-14 md:right-8 lg:bottom-16 lg:right-10 cursor-pointer">
         Get Started
       </button></Link> 
     </div>

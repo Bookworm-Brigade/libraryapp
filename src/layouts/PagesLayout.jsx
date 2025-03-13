@@ -5,9 +5,12 @@ import { Footer } from "../components/Footer";
 export const PagesLayout = (props) => {
   return (
     <>
-      <Navbar />
+    <div className=" h-full flex flex-col justify-between">
+       <Navbar />
       {props.children}
       <Footer />
+    </div>
+     
     </>
   );
 };

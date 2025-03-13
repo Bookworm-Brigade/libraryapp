@@ -1,19 +1,16 @@
 import React from "react";
 import image from "../assets/images/logo.png";
-import Categories from "../pages/Categories";
-import CrudModal from "./AddBookButton";
+import AddButton from "./AddBookButton";
 
 export const Navbar = () => {
   return (
-    <div className="h-15 border-2 border-[#800000] flex justify-between items-center">
+    <div className="h-25  flex justify-between items-center">
       <div className="">
-        <img src={image} alt="" className="w-[100px] h-[60px]" />
+        <img src={image} alt="" className="w-[190px] " />
       </div>
-      <div className="navbar text-xl flex justify-end items-center text-[#800000] gap-10">
-        <p>All Books</p>
-        <Categories />
+      <div className="navbar text-xl flex justify-end items-center text-[#800000] px-9 gap-10">
 
-        <CrudModal />
+        <AddButton />
       </div>
     </div>
   );

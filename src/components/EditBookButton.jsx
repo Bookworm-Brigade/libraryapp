@@ -1,23 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
-const AddButton = () => {
+const EditButton = ({ bookToEdit, onDelete }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [post, setPost] = useState({
     title: "",
     author: "",
-    description: "",
-    image: "",
-    publishedYear: "",
+    isbn: "",
+    genre: "",
   });
   const [isLoading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // For success feedback
   const titleInputRef = useRef(null);
 
   // Open/close modal
   const toggleModal = () => {
     setIsOpen(!isOpen);
-    setSuccessMessage("");
+    setSuccessMessage(""); // Reset success message on modal close/open
   };
 
   // Handle form input changes
@@ -33,10 +32,17 @@ const AddButton = () => {
     }
   }, [isOpen]);
 
+  // Populate form fields if editing an existing book
+  useEffect(() => {
+    if (bookToEdit) {
+      setPost(bookToEdit);
+    }
+  }, [bookToEdit]);
+
   // Validate form fields
   const validateForm = () => {
-    const { title, author, description, image, publishedYear } = post;
-    if (!title || !author || !description || !image || !publishedYear) {
+    const { title, author, isbn, genre } = post;
+    if (!title || !author || !isbn || !genre) {
       alert("Please fill out all fields.");
       return false;
     }
@@ -46,54 +52,46 @@ const AddButton = () => {
   // Handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!validateForm()) return;
-    setLoading(true);
 
+    if (!validateForm()) return;
+
+    setLoading(true); // Start loading
     try {
-      const formData = new FormData();
-      formData.append("title", post.title);
-      formData.append("author", post.author);
-      formData.append("description", post.description);
-      formData.append("image", post.image);
-      formData.append("publishedYear", post.publishedYear);
-      const response = await axios.post(
-        "https://library-api-q24c.onrender.com/books",
-        formData
+      const response = await axios.put(
+        `https://library-api-q24c.onrender.com/books/${post.id}`,
+        { ...post, isbn: String(post.isbn) },
+        { timeout: 10000 }
       );
       console.log("Success:", response.data);
-      setSuccessMessage(`Book "${post.title}" has been added successfully.`);
-      setPost({
-        title: "",
-        author: "",
-        description: "",
-        image: "",
-        publishedYear: "",
-      });
+
+      // Show success message and reset form
+      setSuccessMessage(`Book "${post.title}" has been updated successfully.`);
+      setPost({ title: "", author: "", isbn: "", genre: "" }); // Clear form fields
     } catch (error) {
       console.error("Error:", error.message);
-
-      // Check if the error contains a response from the server
-      if (error.response && error.response.status === 422) {
-        const errorDetails = error.response.data;
-
-        // Construct a user-friendly error message based on the server response
-        let errorMessage = "Validation failed:\n";
-        if (errorDetails.details) {
-          for (const [field, message] of Object.entries(errorDetails.details)) {
-            errorMessage += `- ${message}\n`;
-          }
-        } else {
-          errorMessage += errorDetails.error || "Unknown validation error.";
-        }
-
-        // Display the error message to the user
-        alert(errorMessage);
-      } else {
-        // Handle other types of errors (e.g., network issues)
-        alert("An error occurred. Please try again.");
-      }
+      alert("An error occurred. Please try again.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading
+    }
+  };
+
+  // Handle delete book
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this book?")) return;
+
+    setLoading(true); // Start loading
+    try {
+      await axios.delete(`https://library-api-q24c.onrender.com/books/${post.id}`, { timeout: 10000 });
+      console.log("Book deleted successfully");
+
+      // Call the onDelete callback to remove the book from the UI
+      onDelete(post.id);
+    } catch (error) {
+      console.error("Error:", error.message);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setLoading(false); // Stop loading
+      toggleModal(); // Close the modal
     }
   };
 
@@ -102,9 +100,24 @@ const AddButton = () => {
       {/* Modal Toggle Button */}
       <button
         onClick={toggleModal}
-        className="block text-white text-xl font-[700] rounded-full bg-[#800000] px-10 py-5 cursor-pointer"
+        className=" text-black text-xl font-[500] cursor-pointer flex justify-center items-center"
       >
-        Add Book
+         Edit
+        <svg
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M15.232 5.232l3.536 3.536M9 11l6-6 3.536 3.536-6 6H9v-3.536z"
+          />
+        </svg>
+       
       </button>
 
       {/* Main Modal */}
@@ -115,13 +128,17 @@ const AddButton = () => {
           aria-hidden={!isOpen}
           role="dialog"
           className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden"
+          onClick={toggleModal}
         >
-          <div className="relative w-full sm:w-1/2 lg:w-1/2 p-5 border border-gray-200 shadow bg-white">
+          <div
+            className="relative w-full sm:w-1/2 lg:w-1/2 p-5 border border-gray-200 shadow bg-white"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+          >
             {/* Modal Content */}
             <div className="relative rounded-lg bg-white shadow-sm">
               {/* Modal Header */}
               <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4">
-                <h3 className="text-lg font-semibold">Add Book</h3>
+                <h3 className="text-lg font-semibold">Edit Book</h3>
                 <button
                   type="button"
                   onClick={toggleModal}
@@ -151,6 +168,7 @@ const AddButton = () => {
                 {successMessage && (
                   <div className="mb-4 text-green-600">{successMessage}</div>
                 )}
+
                 <div className="grid grid-cols-2 gap-4">
                   {/* Title Field */}
                   <div className="col-span-2">
@@ -191,63 +209,39 @@ const AddButton = () => {
                     />
                   </div>
 
-                  {/* Description Field */}
+                  {/* ISBN Field */}
                   <div className="col-span-2 sm:col-span-1">
                     <label
-                      htmlFor="description"
+                      htmlFor="isbn"
                       className="mb-2 block text-sm font-medium"
                     >
-                      Description
+                      ISBN
                     </label>
                     <input
                       type="text"
-                      id="description"
-                      value={post.description}
+                      id="isbn"
+                      value={post.isbn}
                       onChange={handleInput}
-                      placeholder="Type Description here"
+                      placeholder="Type ISBN here"
                       required
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-5 text-sm"
                     />
                   </div>
 
-                  {/* Image Field */}
+                  {/* Genre Field */}
                   <div className="col-span-2 sm:col-span-1">
                     <label
-                      htmlFor="image"
+                      htmlFor="genre"
                       className="mb-2 block text-sm font-medium"
                     >
-                      Image
-                    </label>
-                    <input
-                      type="file"
-                      id="image"
-                      onChange={(event) => {
-                        if (event.target.files && event.target.files[0]) {
-                          setPost((prevPost) => ({
-                            ...prevPost,
-                            image: event.target.files[0],
-                          }));
-                        }
-                      }}
-                      required
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-5 text-sm"
-                    />
-                  </div>
-
-                  {/* Published Year Field */}
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      htmlFor="publishedYear"
-                      className="mb-2 block text-sm font-medium"
-                    >
-                      Published Year
+                      Genre
                     </label>
                     <input
                       type="text"
-                      id="publishedYear"
-                      value={post.publishedYear}
+                      id="genre"
+                      value={post.genre}
                       onChange={handleInput}
-                      placeholder="Type Published Year here"
+                      placeholder="Type genre here"
                       required
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-5 text-sm"
                     />
@@ -257,7 +251,7 @@ const AddButton = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading} // Disable button during loading
                   className={`mt-4 inline-flex items-center rounded-lg ${
                     isLoading
                       ? "bg-gray-400 cursor-not-allowed"
@@ -299,7 +293,56 @@ const AddButton = () => {
                       />
                     </svg>
                   )}
-                  {isLoading ? "Adding..." : "Add New Book"}
+                  {isLoading ? "Updating..." : "Update Book"}
+                </button>
+
+                {/* Delete Button */}
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isLoading} // Disable button during loading
+                  className={`mt-4 ml-4 inline-flex items-center rounded-lg ${
+                    isLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-red-700 cursor-pointer"
+                  } px-5 py-5 text-center text-sm font-medium text-white`}
+                >
+                  {isLoading ? (
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    <svg
+                      className="mr-2 -ml-1 h-5 w-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                  {isLoading ? "Deleting..." : "Delete Book"}
                 </button>
               </form>
             </div>
@@ -310,4 +353,4 @@ const AddButton = () => {
   );
 };
 
-export default AddButton;
+export default EditButton;
