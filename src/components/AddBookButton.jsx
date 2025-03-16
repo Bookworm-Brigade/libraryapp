@@ -97,17 +97,17 @@ const AddButton = () => {
     }
   };
 
+
   return (
     <>
-      {/* Modal Toggle Button */}
-      <button
-        onClick={toggleModal}
-        className="block text-white text-xl font-[700] rounded-full bg-[#800000] px-10 py-5 cursor-pointer"
-      >
-        Add Book
-      </button>
+        <button
+          onClick={toggleModal}
+          className="block text-white text-[15px] font-[700] rounded-full bg-[#a82323] px-9 py-5 cursor-pointer sm:px-6 sm:py-3 text-sm"
+        >
+          Add Book
+        </button>
 
-      {/* Main Modal */}
+        {/* Main Modal */}
       {isOpen && (
         <div
           id="crud-modal"

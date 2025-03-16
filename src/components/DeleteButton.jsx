@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
@@ -16,27 +15,19 @@ const EditButton = ({ book, setBook }) => {
   const [isLoadingBook, setIsLoadingBook] = useState(false);
   const titleInputRef = useRef(null);
 
-  // Fetch book data when modal opens
   useEffect(() => {
     if (isOpen && book.id) {
       fetchBookData();
     }
   }, [isOpen, book.id]);
 
-  // Fetch existing book data
   const fetchBookData = async () => {
     setIsLoadingBook(true);
     try {
       const response = await axios.get(
         `https://library-api-q24c.onrender.com/books/${book.id}`
       );
-      console.log("Book data:", response.data);
-      const updatedBook = response.data.book;
-      console.log("Updated Book:", updatedBook);
       setBookDetails(response.data);
-      setBook((prevBook) =>
-        prevBook.map((b) => (b.id === updatedBook.id ? updatedBook : b))
-      );
     } catch (error) {
       console.error("Error fetching book:", error);
       alert("Failed to load book data. Please try again.");
@@ -45,26 +36,22 @@ const EditButton = ({ book, setBook }) => {
     }
   };
 
-  // Open/close modal
   const toggleModal = () => {
     setIsOpen(!isOpen);
     setSuccessMessage("");
   };
 
-  // Handle form input changes
   const handleInput = (event) => {
     const { id, value } = event.target;
     setBookDetails((prevBook) => ({ ...prevBook, [id]: value }));
   };
 
-  // Focus on the title input when the modal opens
   useEffect(() => {
     if (isOpen && titleInputRef.current && !isLoadingBook) {
       titleInputRef.current.focus();
     }
   }, [isOpen, isLoadingBook]);
 
-  // Validate form fields
   const validateForm = () => {
     if (!bookDetails.title) {
       alert("Please provide a title.");
@@ -73,7 +60,6 @@ const EditButton = ({ book, setBook }) => {
     return true;
   };
 
-  // Handle form submission for updating
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validateForm()) return;
@@ -116,9 +102,24 @@ const EditButton = ({ book, setBook }) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this book?")) return;
+
+    setLoading(true);
+    try {
+      await axios.delete(`https://library-api-q24c.onrender.com/books/67d2ba41fac5d2da2fae8388`, { timeout: 10000 });
+      setBook((prevBooks) => prevBooks.filter((b) => b.id !== book.id));
+      toggleModal();
+    } catch (error) {
+      console.error("Error:", error.message);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
-      {/* Edit Button */}
       <button
         onClick={toggleModal}
         className="text-white text-1xl font-bold bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded"
@@ -126,19 +127,20 @@ const EditButton = ({ book, setBook }) => {
         Edit
       </button>
 
-      {/* Edit Modal */}
       {isOpen && (
         <div
           id="edit-modal"
           tabIndex="-1"
           aria-hidden={!isOpen}
           role="dialog"
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-50"
+          onClick={toggleModal}
         >
-          <div className="relative w-full sm:w-1/2 lg:w-1/2 p-5 border border-gray-200 shadow bg-white">
-            {/* Modal Content */}
+          <div
+            className="relative w-full sm:w-1/2 lg:w-1/2 p-5 border border-gray-200 shadow bg-white"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+          >
             <div className="relative rounded-lg bg-white shadow-sm">
-              {/* Modal Header */}
               <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4">
                 <h3 className="text-lg font-bold">Edit Book</h3>
                 <button
@@ -165,7 +167,6 @@ const EditButton = ({ book, setBook }) => {
                 </button>
               </div>
 
-              {/* Modal Body */}
               {isLoadingBook ? (
                 <div className="p-4 text-center">
                   Loading book information...
@@ -176,7 +177,6 @@ const EditButton = ({ book, setBook }) => {
                     <div className="mb-4 text-green-600">{successMessage}</div>
                   )}
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Title Field - Required */}
                     <div className="col-span-2">
                       <label
                         htmlFor="title"
@@ -196,7 +196,6 @@ const EditButton = ({ book, setBook }) => {
                       />
                     </div>
 
-                    {/* Author Field - Optional */}
                     <div className="col-span-2 sm:col-span-1">
                       <label
                         htmlFor="author"
@@ -214,7 +213,6 @@ const EditButton = ({ book, setBook }) => {
                       />
                     </div>
 
-                    {/* Description Field - Optional */}
                     <div className="col-span-2 sm:col-span-1">
                       <label
                         htmlFor="description"
@@ -232,7 +230,6 @@ const EditButton = ({ book, setBook }) => {
                       />
                     </div>
 
-                    {/* Published Year Field - Optional */}
                     <div className="col-span-2 sm:col-span-1">
                       <label
                         htmlFor="publishedYear"
@@ -250,7 +247,6 @@ const EditButton = ({ book, setBook }) => {
                       />
                     </div>
 
-                    {/* Note about image updates */}
                     <div className="col-span-2">
                       <p className="text-sm text-gray-500">
                         Note: Image updates are not supported through this form
@@ -259,7 +255,6 @@ const EditButton = ({ book, setBook }) => {
                     </div>
                   </div>
 
-                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -306,6 +301,54 @@ const EditButton = ({ book, setBook }) => {
                       </svg>
                     )}
                     {isLoading ? "Updating..." : "Update Book"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isLoading}
+                    className={`mt-4 ml-4 inline-flex items-center rounded-lg ${
+                      isLoading
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-red-700 cursor-pointer"
+                    } px-5 py-5 text-center text-sm font-medium text-white`}
+                  >
+                    {isLoading ? (
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    ) : (
+                      <svg
+                        className="mr-2 -ml-1 h-5 w-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                    {isLoading ? "Deleting..." : "Delete Book"}
                   </button>
                 </form>
               )}
