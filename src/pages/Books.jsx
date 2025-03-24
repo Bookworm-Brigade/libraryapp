@@ -1,36 +1,49 @@
-import React, { useState , useEffect} from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Navbar } from "../components/Navbar";
 import BookCard from "../components/BookCard";
 import { Footer } from "../components/Footer";
 import axios from "axios";
-
 export const Books = () => {
-  // define product state or variable store
-  const [books, setBook] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // define a function to fetch products fetch
   const getBooks = async () => {
-    const response = await axios.get(
-      "https://library-api-q24c.onrender.com/books"
-    );
-    setBook(response.data.books);
+    try {
+      const response = await axios.get(
+        "https://library-api-q24c.onrender.com/books"
+      );
+      setBooks(response.data.books);
+    } catch (error) {
+      console.error(error);
+      setError("Failed to fetch books. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // execute fetcher call
   useEffect(() => {
     getBooks();
   }, []);
 
+  const sortedBooks = useMemo(() => {
+    return [...books].sort((a, b) => a.title.localeCompare(b.title));
+  }, [books]);
+
+  if (loading) return <p className="text-center">Loading...</p>;
+  if (error) return <p className="text-red-500 text-center">{error}</p>;
+
   return (
     <>
-      <Navbar/>
-        <div className="bg-[#ffffff] w-full min-h-[90vh] flex flex-wrap gap-10 px-1 justify-center ">
-        {books.map((book) => (
-                  <BookCard key={book.id} book={book} setBook={setBook} />
-                ))}
-        </div>
-     <Footer/>
+      <Navbar />
+      <div className="bg-[#ffffff] w-full min-h-[90vh] flex flex-wrap gap-10 px-1 justify-center">
+        {sortedBooks.map((book) => (
+          <BookCard key={book.id} book={book} />
+        ))}
+      </div>
+      <Footer />
     </>
   );
 };
+
 export default Books;
