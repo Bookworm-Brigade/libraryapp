@@ -16,7 +16,7 @@ export function BookDetails({ book, setOpenModal }) {
         <div className="w-full md:w-1/2 h-64 md:h-auto">
           <img
             className="w-full h-full object-cover"
-            src={book.image}
+            src={book.image || "https://images.unsplash.com/photo-1519764340700-3db40311f21e?q=80&w=775&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}
             alt="Book Cover"
           />
         </div>

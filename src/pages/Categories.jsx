@@ -2,9 +2,6 @@ import React from "react";
 import Dropdown from 'react-bootstrap/Dropdown';
 import { IoMdArrowDropdown } from "react-icons/io";
 
-
-
-
 function Categories() {
     return (
         <div className="categories">

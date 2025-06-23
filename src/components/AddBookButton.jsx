@@ -102,7 +102,7 @@ const AddButton = () => {
     <>
         <button
           onClick={toggleModal}
-          className="block text-white text-[15px] font-[700] rounded-full bg-[#a82323] px-9 py-5 cursor-pointer sm:px-6 sm:py-3 text-sm"
+          className="block text-white text-[12px] font-[700] rounded-xl bg-[#d80303] px-9 py-5 cursor-pointer sm:px-6 sm:py-3 text-sm"
         >
           Add Book
         </button>
