@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import Landing from "./pages/Landing";
 import Books from "./pages/Books";
 import SingleBook from "./pages/SingleBook";
-import { Test } from "./pages/test";
+import { Test } from "./pages/Test";
 
 function App() {
   return (
